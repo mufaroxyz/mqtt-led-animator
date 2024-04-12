@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import GridCanvas from "./grid-canvas";
 import { Button } from "./button";
 import { Plus, Trash2, Upload } from "lucide-react";
 
-export type Matrix = boolean[][];
+type MatrixObject = [boolean, RGB];
+
+export type Matrix = MatrixObject[][];
 
 export type MatrixMetadata = {
   keyframe: number;
@@ -11,7 +13,7 @@ export type MatrixMetadata = {
   matrix: Matrix;
 };
 
-type RGB = {
+export type RGB = {
   r: number;
   g: number;
   b: number;
@@ -19,7 +21,10 @@ type RGB = {
 
 const getDefaultMatrix = () => {
   return Array.from({ length: 16 }, () =>
-    Array.from({ length: 16 }, () => false)
+    Array.from(
+      { length: 16 },
+      () => [false, { r: 0, g: 0, b: 0 }] as MatrixObject
+    )
   );
 };
 
@@ -91,9 +96,9 @@ export default function AnimationGrid() {
 
               <div key={`grid-view-${i}`}>
                 <GridCanvas
+                  currentRGB={rgbMap}
                   gridData={gridData[i]}
                   setGridData={updateGrid}
-                  updateDuration={updateDuration}
                   key={`grid-canvas-${i}-keyframe-${data.keyframe}`}
                   duration={data.duration}
                   rows={16}
