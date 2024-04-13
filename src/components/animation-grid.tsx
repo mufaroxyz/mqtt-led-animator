@@ -1,115 +1,28 @@
-import { useState } from "react";
 import GridCanvas from "./grid-canvas";
 import { Button } from "./button";
 import { Plus, Trash2, Upload } from "lucide-react";
+import { MatrixMetadata, RGB, getDefaultMatrix } from "./tools";
 
-type MatrixObject = [boolean, RGB];
+interface AnimationGridProps {
+  gridInView: number;
+  setGridInView: React.Dispatch<React.SetStateAction<number>>;
+  rgbMap: RGB;
+  setRgbMap: React.Dispatch<React.SetStateAction<RGB>>;
+  gridData: MatrixMetadata[];
+  setGridData: React.Dispatch<React.SetStateAction<MatrixMetadata[]>>;
+}
 
-export type Matrix = MatrixObject[][];
-
-export type MatrixMetadata = {
-  keyframe: number;
-  duration: number;
-  matrix: Matrix;
-};
-
-export type RGB = {
-  r: number;
-  g: number;
-  b: number;
-};
-
-const getDefaultMatrix = () => {
-  return Array.from({ length: 16 }, () =>
-    Array.from(
-      { length: 16 },
-      () => [false, { r: 0, g: 0, b: 0 }] as MatrixObject
-    )
-  );
-};
-
-export default function AnimationGrid() {
-  const [rgbMap, setRgbMap] = useState<RGB>({
-    r: 255,
-    g: 255,
-    b: 255,
-  });
-
-  const [gridData, setGridData] = useState<MatrixMetadata[]>([
-    {
-      keyframe: 0,
-      duration: 1,
-      matrix: getDefaultMatrix(),
-    },
-  ]);
-
-  const updateGrid = (index: number, matrix: Matrix) => {
-    setGridData((prev) =>
-      prev.map((data) => (data.keyframe === index ? { ...data, matrix } : data))
-    );
-  };
-
-  const updateDuration = (index: number, duration: number) => {
-    setGridData((prev) =>
-      prev.map((data) =>
-        data.keyframe === index ? { ...data, duration } : data
-      )
-    );
-  };
-
+export default function AnimationGrid({
+  gridInView,
+  setGridInView,
+  rgbMap,
+  setRgbMap,
+  gridData,
+  setGridData,
+}: AnimationGridProps) {
   return (
-    <>
-      <div className="w-full h-[800px] overflow-y-scroll overflow-x-hidden  p-4">
-        <div className="grid grid-flow-row grid-cols-7 gap-4 mb-4">
-          {gridData.map((data, i) => (
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between">
-                <Button
-                  variant="accent"
-                  className="h-10"
-                  onClick={() => {
-                    const newGridData = [...gridData];
-                    newGridData.splice(i, 1);
-                    setGridData(newGridData);
-                  }}
-                  disabled={i === 0}
-                >
-                  <Trash2 />
-                </Button>
-                <div className="rounded-md flex justify-between w-20 border-2 border-solid-1 border-input-hover focus:border-input-border p-2 bg-input focus:outline-none transition-all duration-100 ease-in-out">
-                  <input
-                    className="w-10 text-right bg-transparent focus:outline-none"
-                    value={data.duration}
-                    onChange={(e) => {
-                      if (isNaN(+e.target.value)) return e.preventDefault();
-                      if (+e.target.value < 0 && +e.target.value > 10)
-                        return e.preventDefault();
-
-                      updateDuration(data.keyframe, +e.target.value);
-                    }}
-                  />
-                  <div>
-                    <span className="font-bold text-accent opacity-60">s</span>
-                  </div>
-                </div>
-              </div>
-
-              <div key={`grid-view-${i}`}>
-                <GridCanvas
-                  currentRGB={rgbMap}
-                  gridData={gridData[i]}
-                  setGridData={updateGrid}
-                  key={`grid-canvas-${i}-keyframe-${data.keyframe}`}
-                  duration={data.duration}
-                  rows={16}
-                  cols={16}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex gap-10 items-center mb-2 px-6 bg-zinc-800 py-2 fixed bottom-0 left-[50%] -translate-x-[50%] rounded-xl border-solid border-2 border-accent">
+    <div className="fixed w-full bottom-0">
+      <div className="flex w-fit gap-10 items-center mb-2 px-6 bg-zinc-800 py-2 bottom-0 mx-auto rounded-xl border-solid border-2 border-accent">
         <div className="flex items-center gap-4">
           <div className="flex gap-4">
             <div className="flex gap-2 items-center">
@@ -172,6 +85,7 @@ export default function AnimationGrid() {
                   matrix: getDefaultMatrix(),
                 },
               ]);
+              setGridInView(gridData.length);
             }}
             icon={<Plus size={20} />}
           >
@@ -184,8 +98,47 @@ export default function AnimationGrid() {
           >
             Upload
           </Button>
+          <Button
+            variant="accent"
+            onClick={() => {
+              const newGridData = [...gridData].filter(
+                (data) => data.keyframe !== gridInView
+              );
+              setGridData(newGridData);
+              setGridInView(0);
+            }}
+            icon={<Trash2 size={20} />}
+          >
+            Delete
+          </Button>
         </div>
       </div>
-    </>
+      <div className="w-full h-fit overflow-y-hidden overflow-x-scroll  p-4">
+        <div className="flex gap-4 mb-4">
+          {gridData.map((data, i) => (
+            <div className="flex flex-col gap-2" key={`grid-view-div-${i}`}>
+              <div className="flex justify-center">
+                <p>{data.keyframe + 1}</p>
+              </div>
+
+              <div
+                key={`grid-view-${i}`}
+                className="cursor-pointer"
+                onClick={() => setGridInView(i)}
+              >
+                {/* @ts-ignore */}
+                <GridCanvas
+                  currentRGB={rgbMap}
+                  gridData={gridData[i]}
+                  key={`grid-canvas-${i}-keyframe-${data.keyframe}`}
+                  rows={16}
+                  cols={16}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

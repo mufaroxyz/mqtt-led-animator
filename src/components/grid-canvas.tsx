@@ -1,22 +1,22 @@
 import { useState } from "react";
 import GridColumn from "./grid-columns";
-import { Matrix, MatrixMetadata, RGB } from "./animation-grid";
+import { Matrix, MatrixMetadata, RGB } from "./tools";
 
 interface GridCanvasProps {
   rows: number;
   cols: number;
-  duration: number;
-  gridData: MatrixMetadata;
   currentRGB: RGB;
+  gridData: MatrixMetadata;
+  useBig?: boolean;
   setGridData: (index: number, matrix: Matrix) => void;
 }
 
 export default function GridCanvas({
   rows,
   cols,
-  duration,
   gridData,
   currentRGB,
+  useBig,
   setGridData,
 }: GridCanvasProps) {
   const [arrMap] = useState(() => Array.from({ length: cols }));
@@ -28,9 +28,9 @@ export default function GridCanvas({
           currentRGB={currentRGB}
           columnIndex={i}
           gridData={gridData}
-          duration={duration}
-          setGridData={setGridData}
           rows={rows}
+          useBig={useBig ?? false}
+          setGridData={setGridData}
           key={`grid-column-${i}-keyframe-${gridData.keyframe}`}
         />
       ))}

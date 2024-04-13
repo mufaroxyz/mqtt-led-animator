@@ -1,10 +1,10 @@
-import AnimationGrid from "../components/animation-grid";
 import PageWrapper from "../components/page-wrapper";
+import Scope from "../components/scope";
 
 export default function Root() {
   return (
-    <PageWrapper header="LytharHome - Animation">
-      <AnimationGrid />
+    <PageWrapper header="">
+      <Scope />
     </PageWrapper>
   );
 }

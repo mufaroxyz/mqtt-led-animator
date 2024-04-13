@@ -1,18 +1,20 @@
 import { useState } from "react";
-import { Matrix, MatrixMetadata, RGB } from "./animation-grid";
+import { MatrixMetadata, RGB } from "./tools";
+import { cn } from "./utils";
 
 interface GridColumnProps {
   columnIndex: number;
   rows: number;
-  duration: number;
   gridData: MatrixMetadata;
   currentRGB: RGB;
-  setGridData: (index: number, matrix: Matrix) => void;
+  useBig: boolean;
+  setGridData: (keyframe: number, matrix: MatrixMetadata["matrix"]) => void;
 }
 
 export default function GridColumn({
   columnIndex,
   currentRGB,
+  useBig,
   rows,
   gridData,
   setGridData,
@@ -22,11 +24,17 @@ export default function GridColumn({
   return (
     <div>
       {arrMap.map((_, i) => {
-        const { r, g, b } = gridData.matrix[columnIndex][i][1];
+        const { r, g, b } = gridData.matrix[columnIndex][i][1] ?? {
+          r: 0,
+          g: 0,
+          b: 0,
+        };
         return (
           <div
             key={`grid-column_-${i}-keyframe-${gridData.keyframe}`}
             onClick={() => {
+              if (!useBig) return;
+              console.log(gridData);
               const matrix = [...gridData.matrix];
               matrix[columnIndex][i][0] = !matrix[columnIndex][i];
               matrix[columnIndex][i][1] = currentRGB;
@@ -36,7 +44,10 @@ export default function GridColumn({
             style={{
               backgroundColor: `rgb(${r}, ${g}, ${b})` ?? "black",
             }}
-            className="w-4 h-4 bg-button-dark border border-solid-1 border-input-hover cursor-pointer"
+            className={cn(
+              "w-[10px] h-[10px] bg-button-dark border border-solid-1 border-input-hover",
+              useBig ? "w-[30px] h-[30px]" : ""
+            )}
           ></div>
         );
       })}
